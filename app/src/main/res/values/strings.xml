@@ -1,4 +1,8 @@
 <resources>
     <string name="app_name">Guardian News</string>
     <string name="action_settings">Settings</string>
+    <string name="settings_sport">sport</string>
+    <string name="settings_politic">politics</string>
+    <string name="section">section</string>
+    <string name="settings_title">Options</string>
 </resources>

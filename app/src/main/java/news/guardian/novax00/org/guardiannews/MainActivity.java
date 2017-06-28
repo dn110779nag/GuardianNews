@@ -3,8 +3,10 @@ package news.guardian.novax00.org.guardiannews;
 import android.app.LoaderManager;
 import android.content.Intent;
 import android.content.Loader;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
@@ -88,6 +90,8 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+            Intent settingsIntent = new Intent(this, SettingsActivity.class);
+            startActivity(settingsIntent);
             return true;
         }
 
@@ -97,7 +101,11 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     @Override
     public Loader<List<Article>> onCreateLoader(int id, Bundle args) {
         findViewById(R.id.progress).setVisibility(View.VISIBLE);
-        return new ArticleLoader(this, "sport");
+        SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
+        String section = sharedPrefs.getString(
+                getString(R.string.section),
+                getString(R.string.settings_politic));
+        return new ArticleLoader(this, section);
     }
 
     @Override
