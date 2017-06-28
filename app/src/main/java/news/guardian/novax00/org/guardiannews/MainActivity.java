@@ -11,22 +11,29 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import java.util.Date;
 import java.util.List;
 
 import news.guardian.novax00.org.guardiannews.structs.Article;
 import news.guardian.novax00.org.guardiannews.util.ArticleLoader;
 import news.guardian.novax00.org.guardiannews.util.NetworkUtil;
+import static news.guardian.novax00.org.guardiannews.util.AppUtil.LOG_TAG;
 
-public class MainActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<List<Article>>{
+public class MainActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<List<Article>>, AbsListView.OnScrollListener {
 
     private ArticleAdapter adapter;
+    private String previosSection = "";
+    private int currentPage;
+    private boolean loading = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,10 +43,10 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         setSupportActionBar(toolbar);
 
 
-        ListView earthquakeListView = (ListView) findViewById(R.id.list);
-        earthquakeListView.setEmptyView(findViewById(R.id.emptyMessage));
+        ListView listView = (ListView) findViewById(R.id.list);
+        listView.setEmptyView(findViewById(R.id.emptyMessage));
 
-        earthquakeListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 Article article = (Article) adapterView.getItemAtPosition(i);
@@ -49,12 +56,16 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
             }
         });
 
+        listView.setOnScrollListener(this);
+
+
+
         // Create a new {@link ArrayAdapter} of earthquakes
         this.adapter = new ArticleAdapter(this);
 
         // Set the adapter on the {@link ListView}
         // so the list can be populated in the user interface
-        earthquakeListView.setAdapter(adapter);
+        listView.setAdapter(adapter);
 
 
         if(NetworkUtil.checkConnectivity(this.getApplicationContext())) {
@@ -105,7 +116,14 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         String section = sharedPrefs.getString(
                 getString(R.string.section),
                 getString(R.string.settings_politic));
-        return new ArticleLoader(this, section);
+
+        if(!this.previosSection.equals(section)){
+            this.currentPage = 1;
+            this.previosSection = section;
+            this.adapter.setData(null);
+        }
+
+        return new ArticleLoader(this, section, this.currentPage);
     }
 
     @Override
@@ -114,7 +132,9 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         if(data==null){
             ((TextView)findViewById(R.id.emptyMessage)).setText("no data available");
         } else{
-            this.adapter.setData(data);
+            this.adapter.addData(data);
+            this.currentPage++;
+            this.loading = false;
         }
     }
 
@@ -122,5 +142,23 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     public void onLoaderReset(Loader<List<Article>> loader) {
         findViewById(R.id.progress).setVisibility(View.GONE);
         adapter.setData(null);
+    }
+
+
+    @Override
+    public void onScrollStateChanged(AbsListView view, int scrollState) {
+        Log.v(LOG_TAG, "onScrollStateChanged");
+    }
+
+    @Override
+    public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+        Log.v(LOG_TAG, "onScroll");
+        boolean loadMore = firstVisibleItem + visibleItemCount >= totalItemCount;
+        if(loadMore && adapter!=null && !loading){
+            getLoaderManager().restartLoader(0, null, this);
+            loading = true;
+//            adapter.addData(new Article("title"+firstVisibleItem + visibleItemCount,
+//                    "", new Date()));
+        }
     }
 }

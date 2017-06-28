@@ -27,10 +27,12 @@ public class ArticleLoader extends AsyncTaskLoader<List<Article>> {
     private final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
 
     private String section;
+    private int page;
 
-    public ArticleLoader(Context context, String section) {
+    public ArticleLoader(Context context, String section, int page) {
         super(context);
         this.section = section;
+        this.page = page;
     }
 
 
@@ -77,6 +79,7 @@ public class ArticleLoader extends AsyncTaskLoader<List<Article>> {
         uriBuilder.appendQueryParameter("api-key", NetworkUtil.API_KEY);
         uriBuilder.appendQueryParameter("lang", "en");
         uriBuilder.appendQueryParameter("section", section);
+        uriBuilder.appendQueryParameter("page", ""+page);
         return new URL(uriBuilder.toString());
     }
 }

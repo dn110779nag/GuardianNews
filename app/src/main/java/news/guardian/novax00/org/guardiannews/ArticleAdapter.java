@@ -23,6 +23,7 @@ public class ArticleAdapter extends ArrayAdapter<Article> {
 
     public final SimpleDateFormat dateFormat = new SimpleDateFormat("dd MMM");
     public final SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm");
+
     public ArticleAdapter(@NonNull Context context) {
         super(context, 0);
     }
@@ -36,7 +37,7 @@ public class ArticleAdapter extends ArrayAdapter<Article> {
         }
         String time = timeFormat.format(info.getPublishDate());
         String date = dateFormat.format(info.getPublishDate());
-        ((TextView) convertView.findViewById(R.id.date)).setText(date+"\n"+time);
+        ((TextView) convertView.findViewById(R.id.date)).setText(date + "\n" + time);
         ((TextView) convertView.findViewById(R.id.article)).setText(info.getTitle());
         return convertView;
     }
@@ -47,5 +48,15 @@ public class ArticleAdapter extends ArrayAdapter<Article> {
             addAll(data);
         }
 
+    }
+
+    public void addData(Article data) {
+        add(data);
+    }
+
+    public void addData(List<Article> data) {
+        if(data!=null) {
+            addAll(data);
+        }
     }
 }
